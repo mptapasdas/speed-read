@@ -5,7 +5,9 @@ interface ControlBarProps {
   wpm: number;
   setWpm: (wpm: number) => void;
   isPlaying: boolean;
+  isComplete: boolean;
   togglePlay: () => void;
+  onRestart: () => void;
   currentIndex: number;
   totalWords: number;
   onExit: () => void;
@@ -18,7 +20,9 @@ export default function ControlBar({
   wpm,
   setWpm,
   isPlaying,
+  isComplete,
   togglePlay,
+  onRestart,
   currentIndex,
   totalWords,
   onExit,
@@ -117,7 +121,7 @@ export default function ControlBar({
             </div>
           </div>
 
-          {/* Bottom row: presets + play */}
+          {/* Bottom row: presets · primary action · kbd */}
           <div className="flex items-center justify-between gap-6">
             {/* Preset chips */}
             <div
@@ -145,30 +149,69 @@ export default function ControlBar({
               })}
             </div>
 
-            {/* Keyboard hints */}
+            {/* Primary action — the focal circle */}
+            <button
+              onClick={isComplete ? onRestart : togglePlay}
+              aria-label={isComplete ? "Read again" : isPlaying ? "Pause" : "Play"}
+              className="relative flex items-center justify-center shrink-0 transition-colors"
+              style={{
+                width: "60px",
+                height: "60px",
+                borderRadius: "9999px",
+                background: "var(--accent)",
+                color: "#fff",
+                boxShadow:
+                  "0 8px 28px -10px color-mix(in srgb, var(--accent) 55%, transparent), inset 0 0 0 1px color-mix(in srgb, #fff 14%, transparent)",
+              }}
+            >
+              {isComplete ? (
+                <svg
+                  width="22"
+                  height="22"
+                  viewBox="0 0 22 22"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.9"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M18 11a7 7 0 1 1-2.1-5" />
+                  <path d="M18.5 4v4h-4" />
+                </svg>
+              ) : isPlaying ? (
+                <svg
+                  width="16"
+                  height="20"
+                  viewBox="0 0 16 20"
+                  fill="currentColor"
+                  aria-hidden="true"
+                >
+                  <rect x="1.5" y="1.5" width="4.5" height="17" rx="0.5" />
+                  <rect x="10" y="1.5" width="4.5" height="17" rx="0.5" />
+                </svg>
+              ) : (
+                <svg
+                  width="20"
+                  height="22"
+                  viewBox="0 0 20 22"
+                  fill="currentColor"
+                  style={{ marginLeft: "3px" }}
+                  aria-hidden="true"
+                >
+                  <path d="M2.5 2L18 11L2.5 20V2Z" />
+                </svg>
+              )}
+            </button>
+
+            {/* Keyboard hint */}
             <div
               className="hidden sm:flex items-center gap-2 font-mono uppercase tracking-[0.2em]"
               style={{ fontSize: "9px", color: "var(--muted)" }}
             >
               <kbd>SPACE</kbd>
-              <span>{isPlaying ? "pause" : "play"}</span>
+              <span>{isComplete ? "restart" : isPlaying ? "pause" : "play"}</span>
             </div>
-
-            {/* Play / Pause */}
-            <button
-              onClick={togglePlay}
-              className="group inline-flex items-baseline gap-2.5 font-serif italic transition-colors"
-              style={{
-                fontSize: "1.125rem",
-                color: "var(--accent)",
-                fontVariationSettings: '"opsz" 30, "WONK" 1',
-              }}
-            >
-              {isPlaying ? "Pause" : "Play"}
-              <span className="not-italic font-mono" style={{ fontSize: "12px", color: "var(--accent)" }}>
-                {isPlaying ? "❚❚" : "▸"}
-              </span>
-            </button>
           </div>
         </div>
       </div>

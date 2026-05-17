@@ -33,11 +33,18 @@ export default function ReaderScreen({ words, onExit }: ReaderScreenProps) {
   }, [words.length]);
 
   const togglePlay = useCallback(() => {
-    setIsPlaying((p) => {
-      if (isComplete) return false;
-      return !p;
-    });
+    if (isComplete) {
+      setCurrentIndex(0);
+      setIsPlaying(true);
+      return;
+    }
+    setIsPlaying((p) => !p);
   }, [isComplete]);
+
+  const restart = useCallback(() => {
+    setCurrentIndex(0);
+    setIsPlaying(true);
+  }, []);
 
   const adjustWpm = useCallback((delta: number) => {
     setWpm((w) => Math.min(1000, Math.max(50, w + delta)));
@@ -51,7 +58,7 @@ export default function ReaderScreen({ words, onExit }: ReaderScreenProps) {
     return () => document.removeEventListener("visibilitychange", handleVisibility);
   }, []);
 
-  useWordTimer({ isPlaying, wpm, onAdvance: advance });
+  useWordTimer({ words, currentIndex, isPlaying, wpm, onAdvance: advance });
   const { showControls } = useFocusMode(!isPlaying);
   useKeyboard(togglePlay, adjustWpm);
 
@@ -82,7 +89,7 @@ export default function ReaderScreen({ words, onExit }: ReaderScreenProps) {
 
       {/* Completion mark */}
       {isComplete && !isPlaying && (
-        <div className="absolute top-16 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2">
+        <div className="absolute top-16 left-1/2 -translate-x-1/2 flex flex-col items-center gap-3">
           <span
             className="font-serif italic"
             style={{
@@ -99,6 +106,17 @@ export default function ReaderScreen({ words, onExit }: ReaderScreenProps) {
           >
             {words.length.toLocaleString()} words read
           </span>
+          <button
+            onClick={restart}
+            className="mt-1 font-serif italic hover:underline underline-offset-4"
+            style={{
+              fontSize: "0.95rem",
+              color: "var(--ink-soft)",
+              fontVariationSettings: '"opsz" 20, "WONK" 1',
+            }}
+          >
+            ↺ &nbsp;Read again
+          </button>
         </div>
       )}
 
@@ -108,7 +126,9 @@ export default function ReaderScreen({ words, onExit }: ReaderScreenProps) {
         wpm={wpm}
         setWpm={setWpm}
         isPlaying={isPlaying}
+        isComplete={isComplete}
         togglePlay={togglePlay}
+        onRestart={restart}
         currentIndex={currentIndex}
         totalWords={words.length}
         onExit={onExit}
